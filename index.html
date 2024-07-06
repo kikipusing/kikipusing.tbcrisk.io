@@ -1,0 +1,1418 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/L.Control.Locate.min.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/filter.css">
+<link rel="stylesheet" href="css/nouislider.min.css">
+        <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/L.Control.Locate.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-control-geocoder.Geocoder.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="js/tailDT.js"></script>
+<script src="js/nouislider.min.js"></script>
+<script src="js/wNumb.js"></script>
+        <script src="data/OfficialRegencyMunicipalityTBCRisk_3.js"></script>
+        <script src="data/SubdistrictTBCRisk_4.js"></script>
+        <script src="data/UrbanVillageTBCRisk_5.js"></script>
+        <script src="data/TBCSusceptibilityRisk1Km_6.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        }).fitBounds([[-9.493647928650189,110.47772155431527],[-5.834901151974309,117.07653270510569]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // add class to format popup if it contains media
+		function addClassToPopupIfMedia(content, popup) {
+			var tempDiv = document.createElement('div');
+			tempDiv.innerHTML = content;
+			if (tempDiv.querySelector('td img')) {
+				popup._contentNode.classList.add('media');
+					// Delay to force the redraw
+					setTimeout(function() {
+						popup.update();
+					}, 10);
+			} else {
+				popup._contentNode.classList.remove('media');
+			}
+		}
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        L.control.locate({locateOptions: {maxZoom: 19}}).addTo(map);
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_OSMStandard_0');
+        map.getPane('pane_OSMStandard_0').style.zIndex = 400;
+        var layer_OSMStandard_0 = L.tileLayer('http://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            pane: 'pane_OSMStandard_0',
+            opacity: 1.0,
+            attribution: '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors, CC-BY-SA</a>',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 19
+        });
+        layer_OSMStandard_0;
+        map.createPane('pane_GoogleSatellite_1');
+        map.getPane('pane_GoogleSatellite_1').style.zIndex = 401;
+        var layer_GoogleSatellite_1 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleSatellite_1',
+            opacity: 1.0,
+            attribution: '<a href="https://www.google.at/permissions/geoguidelines/attr-guide.html">Map data ©2015 Google</a>',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 20
+        });
+        layer_GoogleSatellite_1;
+        map.createPane('pane_GoogleHybrid_2');
+        map.getPane('pane_GoogleHybrid_2').style.zIndex = 402;
+        var layer_GoogleHybrid_2 = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleHybrid_2',
+            opacity: 1.0,
+            attribution: '<a href="https://www.google.at/permissions/geoguidelines/attr-guide.html">Map data ©2015 Google</a>',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 20
+        });
+        layer_GoogleHybrid_2;
+        map.addLayer(layer_GoogleHybrid_2);
+        function pop_OfficialRegencyMunicipalityTBCRisk_3(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2"><strong>id</strong><br />' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>KabKota</strong><br />' + (feature.properties['KabKota'] !== null ? autolinker.link(feature.properties['KabKota'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Prevalensi</strong><br />' + (feature.properties['Prevalensi'] !== null ? autolinker.link(feature.properties['Prevalensi'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_OfficialRegencyMunicipalityTBCRisk_3_0(feature) {
+            if (feature.properties['Prevalensi'] >= 0.000000 && feature.properties['Prevalensi'] <= 0.185000 ) {
+                return {
+                pane: 'pane_OfficialRegencyMunicipalityTBCRisk_3',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(3,147,10,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Prevalensi'] >= 0.185000 && feature.properties['Prevalensi'] <= 0.240000 ) {
+                return {
+                pane: 'pane_OfficialRegencyMunicipalityTBCRisk_3',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(77,255,1,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Prevalensi'] >= 0.240000 && feature.properties['Prevalensi'] <= 0.306000 ) {
+                return {
+                pane: 'pane_OfficialRegencyMunicipalityTBCRisk_3',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(247,255,1,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Prevalensi'] >= 0.306000 && feature.properties['Prevalensi'] <= 0.452000 ) {
+                return {
+                pane: 'pane_OfficialRegencyMunicipalityTBCRisk_3',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,90,35,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Prevalensi'] >= 0.452000 && feature.properties['Prevalensi'] <= 0.678384 ) {
+                return {
+                pane: 'pane_OfficialRegencyMunicipalityTBCRisk_3',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(202,7,0,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_OfficialRegencyMunicipalityTBCRisk_3');
+        map.getPane('pane_OfficialRegencyMunicipalityTBCRisk_3').style.zIndex = 403;
+        map.getPane('pane_OfficialRegencyMunicipalityTBCRisk_3').style['mix-blend-mode'] = 'normal';
+        var layer_OfficialRegencyMunicipalityTBCRisk_3 = new L.geoJson(json_OfficialRegencyMunicipalityTBCRisk_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_OfficialRegencyMunicipalityTBCRisk_3',
+            layerName: 'layer_OfficialRegencyMunicipalityTBCRisk_3',
+            pane: 'pane_OfficialRegencyMunicipalityTBCRisk_3',
+            onEachFeature: pop_OfficialRegencyMunicipalityTBCRisk_3,
+            style: style_OfficialRegencyMunicipalityTBCRisk_3_0,
+        });
+        bounds_group.addLayer(layer_OfficialRegencyMunicipalityTBCRisk_3);
+        function pop_SubdistrictTBCRisk_4(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2"><strong>id</strong><br />' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Kecamatan</strong><br />' + (feature.properties['Kecamatan'] !== null ? autolinker.link(feature.properties['Kecamatan'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Kab/Kota</strong><br />' + (feature.properties['Kab/Kota'] !== null ? autolinker.link(feature.properties['Kab/Kota'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Prevalensi</strong><br />' + (feature.properties['Prevalensi'] !== null ? autolinker.link(feature.properties['Prevalensi'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_SubdistrictTBCRisk_4_0(feature) {
+            if (feature.properties['Prevalensi'] >= 0.130950 && feature.properties['Prevalensi'] <= 0.185000 ) {
+                return {
+                pane: 'pane_SubdistrictTBCRisk_4',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(3,147,10,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Prevalensi'] >= 0.185000 && feature.properties['Prevalensi'] <= 0.240000 ) {
+                return {
+                pane: 'pane_SubdistrictTBCRisk_4',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(77,255,1,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Prevalensi'] >= 0.240000 && feature.properties['Prevalensi'] <= 0.306000 ) {
+                return {
+                pane: 'pane_SubdistrictTBCRisk_4',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(247,255,1,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Prevalensi'] >= 0.306000 && feature.properties['Prevalensi'] <= 0.452000 ) {
+                return {
+                pane: 'pane_SubdistrictTBCRisk_4',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,90,35,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Prevalensi'] >= 0.452000 && feature.properties['Prevalensi'] <= 8.872066 ) {
+                return {
+                pane: 'pane_SubdistrictTBCRisk_4',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(202,7,0,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_SubdistrictTBCRisk_4');
+        map.getPane('pane_SubdistrictTBCRisk_4').style.zIndex = 404;
+        map.getPane('pane_SubdistrictTBCRisk_4').style['mix-blend-mode'] = 'normal';
+        var layer_SubdistrictTBCRisk_4 = new L.geoJson(json_SubdistrictTBCRisk_4, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_SubdistrictTBCRisk_4',
+            layerName: 'layer_SubdistrictTBCRisk_4',
+            pane: 'pane_SubdistrictTBCRisk_4',
+            onEachFeature: pop_SubdistrictTBCRisk_4,
+            style: style_SubdistrictTBCRisk_4_0,
+        });
+        bounds_group.addLayer(layer_SubdistrictTBCRisk_4);
+        function pop_UrbanVillageTBCRisk_5(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2"><strong>Code</strong><br />' + (feature.properties['Code'] !== null ? autolinker.link(feature.properties['Code'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Kelurahan/</strong><br />' + (feature.properties['Kelurahan/'] !== null ? autolinker.link(feature.properties['Kelurahan/'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Kecamatan</strong><br />' + (feature.properties['Kecamatan'] !== null ? autolinker.link(feature.properties['Kecamatan'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Kab/Kota</strong><br />' + (feature.properties['Kab/Kota'] !== null ? autolinker.link(feature.properties['Kab/Kota'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Prevalensi</strong><br />' + (feature.properties['Prevalensi'] !== null ? autolinker.link(feature.properties['Prevalensi'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_UrbanVillageTBCRisk_5_0(feature) {
+            if (feature.properties['Prevalensi'] >= -0.001420 && feature.properties['Prevalensi'] <= 0.185000 ) {
+                return {
+                pane: 'pane_UrbanVillageTBCRisk_5',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(3,147,10,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Prevalensi'] >= 0.185000 && feature.properties['Prevalensi'] <= 0.240000 ) {
+                return {
+                pane: 'pane_UrbanVillageTBCRisk_5',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(77,255,1,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Prevalensi'] >= 0.240000 && feature.properties['Prevalensi'] <= 0.306000 ) {
+                return {
+                pane: 'pane_UrbanVillageTBCRisk_5',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(247,255,1,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Prevalensi'] >= 0.306000 && feature.properties['Prevalensi'] <= 0.452000 ) {
+                return {
+                pane: 'pane_UrbanVillageTBCRisk_5',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,90,35,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Prevalensi'] >= 0.452000 && feature.properties['Prevalensi'] <= 9.071584 ) {
+                return {
+                pane: 'pane_UrbanVillageTBCRisk_5',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(202,7,0,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_UrbanVillageTBCRisk_5');
+        map.getPane('pane_UrbanVillageTBCRisk_5').style.zIndex = 405;
+        map.getPane('pane_UrbanVillageTBCRisk_5').style['mix-blend-mode'] = 'normal';
+        var layer_UrbanVillageTBCRisk_5 = new L.geoJson(json_UrbanVillageTBCRisk_5, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_UrbanVillageTBCRisk_5',
+            layerName: 'layer_UrbanVillageTBCRisk_5',
+            pane: 'pane_UrbanVillageTBCRisk_5',
+            onEachFeature: pop_UrbanVillageTBCRisk_5,
+            style: style_UrbanVillageTBCRisk_5_0,
+        });
+        bounds_group.addLayer(layer_UrbanVillageTBCRisk_5);
+        function pop_TBCSusceptibilityRisk1Km_6(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2"><strong>id</strong><br />' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>kab/kota</strong><br />' + (feature.properties['kab/kota'] !== null ? autolinker.link(feature.properties['kab/kota'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>kecamatan</strong><br />' + (feature.properties['kecamatan'] !== null ? autolinker.link(feature.properties['kecamatan'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>NTL</strong><br />' + (feature.properties['NTL'] !== null ? autolinker.link(feature.properties['NTL'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>NDVI</strong><br />' + (feature.properties['NDVI'] !== null ? autolinker.link(feature.properties['NDVI'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>NDWI</strong><br />' + (feature.properties['NDWI'] !== null ? autolinker.link(feature.properties['NDWI'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>NDBI</strong><br />' + (feature.properties['NDBI'] !== null ? autolinker.link(feature.properties['NDBI'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>NO2</strong><br />' + (feature.properties['NO2'] !== null ? autolinker.link(feature.properties['NO2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>CO</strong><br />' + (feature.properties['CO'] !== null ? autolinker.link(feature.properties['CO'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>SO2</strong><br />' + (feature.properties['SO2'] !== null ? autolinker.link(feature.properties['SO2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>LST Day</strong><br />' + (feature.properties['LST Day'] !== null ? autolinker.link(feature.properties['LST Day'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>LST Night</strong><br />' + (feature.properties['LST Night'] !== null ? autolinker.link(feature.properties['LST Night'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Elevation</strong><br />' + (feature.properties['Elevation'] !== null ? autolinker.link(feature.properties['Elevation'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Healthcare</strong><br />' + (feature.properties['Healthcare'] !== null ? autolinker.link(feature.properties['Healthcare'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Access Hea</strong><br />' + (feature.properties['Access Hea'] !== null ? autolinker.link(feature.properties['Access Hea'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Economic</strong><br />' + (feature.properties['Economic'] !== null ? autolinker.link(feature.properties['Economic'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Access Eco</strong><br />' + (feature.properties['Access Eco'] !== null ? autolinker.link(feature.properties['Access Eco'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Education</strong><br />' + (feature.properties['Education'] !== null ? autolinker.link(feature.properties['Education'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Access Edu</strong><br />' + (feature.properties['Access Edu'] !== null ? autolinker.link(feature.properties['Access Edu'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>O3</strong><br />' + (feature.properties['O3'] !== null ? autolinker.link(feature.properties['O3'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>RWI</strong><br />' + (feature.properties['RWI'] !== null ? autolinker.link(feature.properties['RWI'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Rainfall</strong><br />' + (feature.properties['Rainfall'] !== null ? autolinker.link(feature.properties['Rainfall'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Slope</strong><br />' + (feature.properties['Slope'] !== null ? autolinker.link(feature.properties['Slope'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Air Temp.</strong><br />' + (feature.properties['Air Temp.'] !== null ? autolinker.link(feature.properties['Air Temp.'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Pop.</strong><br />' + (feature.properties['Pop.'] !== null ? autolinker.link(feature.properties['Pop.'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>PM2.5</strong><br />' + (feature.properties['PM2.5'] !== null ? autolinker.link(feature.properties['PM2.5'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Prev. TBC</strong><br />' + (feature.properties['Prev. TBC'] !== null ? autolinker.link(feature.properties['Prev. TBC'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_TBCSusceptibilityRisk1Km_6_0(feature) {
+            if (feature.properties['Prev. TBC'] >= -0.076325 && feature.properties['Prev. TBC'] <= 0.185780 ) {
+                return {
+                pane: 'pane_TBCSusceptibilityRisk1Km_6',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(3,147,10,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Prev. TBC'] >= 0.185780 && feature.properties['Prev. TBC'] <= 0.239655 ) {
+                return {
+                pane: 'pane_TBCSusceptibilityRisk1Km_6',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(77,255,1,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Prev. TBC'] >= 0.239655 && feature.properties['Prev. TBC'] <= 0.305745 ) {
+                return {
+                pane: 'pane_TBCSusceptibilityRisk1Km_6',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(247,255,1,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Prev. TBC'] >= 0.305745 && feature.properties['Prev. TBC'] <= 0.452036 ) {
+                return {
+                pane: 'pane_TBCSusceptibilityRisk1Km_6',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,90,35,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Prev. TBC'] >= 0.452036 && feature.properties['Prev. TBC'] <= 9.112462 ) {
+                return {
+                pane: 'pane_TBCSusceptibilityRisk1Km_6',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(202,7,0,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_TBCSusceptibilityRisk1Km_6');
+        map.getPane('pane_TBCSusceptibilityRisk1Km_6').style.zIndex = 406;
+        map.getPane('pane_TBCSusceptibilityRisk1Km_6').style['mix-blend-mode'] = 'normal';
+        var layer_TBCSusceptibilityRisk1Km_6 = new L.geoJson(json_TBCSusceptibilityRisk1Km_6, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_TBCSusceptibilityRisk1Km_6',
+            layerName: 'layer_TBCSusceptibilityRisk1Km_6',
+            pane: 'pane_TBCSusceptibilityRisk1Km_6',
+            onEachFeature: pop_TBCSusceptibilityRisk1Km_6,
+            style: style_TBCSusceptibilityRisk1Km_6_0,
+        });
+        bounds_group.addLayer(layer_TBCSusceptibilityRisk1Km_6);
+        map.addLayer(layer_TBCSusceptibilityRisk1Km_6);
+        var osmGeocoder = new L.Control.Geocoder({
+            collapsed: true,
+            position: 'topleft',
+            text: 'Search',
+            title: 'Testing'
+        }).addTo(map);
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .className += ' fa fa-search';
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .title += 'Search for a place';
+        var baseMaps = {};
+        var overlaysTree = [
+            {label: 'TBC Susceptibility Risk (%) 1 Km <br /><table><tr><td style="text-align: center;"><img src="legend/TBCSusceptibilityRisk1Km_6_VeryLow01860.png" /></td><td>Very Low (< 0.186 %)</td></tr><tr><td style="text-align: center;"><img src="legend/TBCSusceptibilityRisk1Km_6_Low0186to02401.png" /></td><td>Low (0.186 to 0.240 %)</td></tr><tr><td style="text-align: center;"><img src="legend/TBCSusceptibilityRisk1Km_6_Moderate0241to03062.png" /></td><td>Moderate (0.241 to 0.306 %)</td></tr><tr><td style="text-align: center;"><img src="legend/TBCSusceptibilityRisk1Km_6_High0307to04523.png" /></td><td>High (0.307 to 0.452 %)</td></tr><tr><td style="text-align: center;"><img src="legend/TBCSusceptibilityRisk1Km_6_VeryHigh04524.png" /></td><td>Very High (> 0.452 %)</td></tr></table>', layer: layer_TBCSusceptibilityRisk1Km_6},
+            {label: 'Urban/Village TBC Risk (%)<br /><table><tr><td style="text-align: center;"><img src="legend/UrbanVillageTBCRisk_5_VeryLow01860.png" /></td><td>Very Low (<  0.186 %)</td></tr><tr><td style="text-align: center;"><img src="legend/UrbanVillageTBCRisk_5_Low0186to02401.png" /></td><td>Low (0.186 to 0.240 %)</td></tr><tr><td style="text-align: center;"><img src="legend/UrbanVillageTBCRisk_5_Moderate0241to03062.png" /></td><td>Moderate (0.241 to 0.306 %)</td></tr><tr><td style="text-align: center;"><img src="legend/UrbanVillageTBCRisk_5_High0307to04523.png" /></td><td>High (0.307 to 0.452 %)</td></tr><tr><td style="text-align: center;"><img src="legend/UrbanVillageTBCRisk_5_VeryHigh04524.png" /></td><td>Very High (> 0.452 %)</td></tr></table>', layer: layer_UrbanVillageTBCRisk_5},
+            {label: 'Sub-district TBC Risk (%)<br /><table><tr><td style="text-align: center;"><img src="legend/SubdistrictTBCRisk_4_VeryLow01860.png" /></td><td>Very Low (< 0.186 %)</td></tr><tr><td style="text-align: center;"><img src="legend/SubdistrictTBCRisk_4_Low0186to02401.png" /></td><td>Low (0.186 to 0.240 %)</td></tr><tr><td style="text-align: center;"><img src="legend/SubdistrictTBCRisk_4_Moderate0241to03062.png" /></td><td>Moderate (0.241 to 0.306 %)</td></tr><tr><td style="text-align: center;"><img src="legend/SubdistrictTBCRisk_4_High0307to04523.png" /></td><td>High (0.307 to 0.452 %)</td></tr><tr><td style="text-align: center;"><img src="legend/SubdistrictTBCRisk_4_VeryHigh04524.png" /></td><td>Very High (> 0.452 %)</td></tr></table>', layer: layer_SubdistrictTBCRisk_4},
+            {label: 'Official Regency/Municipality TBC Risk (%)<br /><table><tr><td style="text-align: center;"><img src="legend/OfficialRegencyMunicipalityTBCRisk_3_VeryLow01860.png" /></td><td>Very Low (< 0.186 %)</td></tr><tr><td style="text-align: center;"><img src="legend/OfficialRegencyMunicipalityTBCRisk_3_Low0186to02401.png" /></td><td>Low (0.186 to 0.240 %)</td></tr><tr><td style="text-align: center;"><img src="legend/OfficialRegencyMunicipalityTBCRisk_3_Moderate0241to03062.png" /></td><td>Moderate (0.241 to 0.306 %)</td></tr><tr><td style="text-align: center;"><img src="legend/OfficialRegencyMunicipalityTBCRisk_3_High0307to04523.png" /></td><td>High (0.307 to 0.452 %)</td></tr><tr><td style="text-align: center;"><img src="legend/OfficialRegencyMunicipalityTBCRisk_3_VeryHigh04524.png" /></td><td>Very High (> 0.452 %)</td></tr></table>', layer: layer_OfficialRegencyMunicipalityTBCRisk_3},
+            {label: "Google Hybrid", layer: layer_GoogleHybrid_2},
+            {label: "Google Satellite", layer: layer_GoogleSatellite_1},
+            {label: "OSM Standard", layer: layer_OSMStandard_0},]
+        var lay = L.control.layers.tree(null, overlaysTree,{
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: true,
+        });
+        lay.addTo(map);
+        setBounds();
+        var mapDiv = document.getElementById('map');
+        var row = document.createElement('div');
+        row.className="row";
+        row.id="all";
+        row.style.height = "100%";
+        var col1 = document.createElement('div');
+        col1.className="col9";
+        col1.id = "mapWindow";
+        col1.style.height = "99%";
+        col1.style.width = "80%";
+        col1.style.display = "inline-block";
+        var col2 = document.createElement('div');
+        col2.className="col3";
+        col2.id = "menu";
+        col2.style.display = "inline-block";
+        mapDiv.parentNode.insertBefore(row, mapDiv);
+        document.getElementById("all").appendChild(col1);
+        document.getElementById("all").appendChild(col2);
+        col1.appendChild(mapDiv)
+        var Filters = {"kab/kota": "str","kecamatan": "str"};
+        function filterFunc() {
+          map.eachLayer(function(lyr){
+          if ("options" in lyr && "dataVar" in lyr["options"]){
+            features = this[lyr["options"]["dataVar"]].features.slice(0);
+            try{
+              for (key in Filters){
+                keyS = key.replace(/[^a-zA-Z0-9_]/g, "")
+                if (Filters[key] == "str" || Filters[key] == "bool"){
+                  var selection = [];
+                  var options = document.getElementById("sel_" + keyS).options
+                  for (var i=0; i < options.length; i++) {
+                    if (options[i].selected) selection.push(options[i].value);
+                  }
+                    try{
+                      if (key in features[0].properties){
+                        for (i = features.length - 1;
+                          i >= 0; --i){
+                          if (selection.indexOf(
+                          features[i].properties[key])<0
+                          && selection.length>0) {
+                          features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                  }
+                }
+                if (Filters[key] == "int"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (parseInt(features[i].properties[key])
+                          < sliderVals[0]
+                          || parseInt(features[i].properties[key])
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "real"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (features[i].properties[key]
+                          < sliderVals[0]
+                          || features[i].properties[key]
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "date"
+                  || Filters[key] == "datetime"
+                  || Filters[key] == "time"){
+                  try{
+                    if (key in features[0].properties){
+                      HTMLkey = key.replace(/[&\/\\#,+()$~%.'":*?<>{} ]/g, '');
+                      startdate = document.getElementById("dat_" +
+                        HTMLkey + "_date1").value.replace(" ", "T");
+                      enddate = document.getElementById("dat_" +
+                        HTMLkey + "_date2").value.replace(" ", "T");
+                      for (i = features.length - 1; i >= 0; --i){
+                        if (features[i].properties[key] < startdate
+                          || features[i].properties[key] > enddate){
+                          features.splice(i,1);
+                        }
+                      }
+                    }
+                  } catch(err){
+                  }
+                }
+              }
+            } catch(err){
+            }
+          this[lyr["options"]["layerName"]].clearLayers();
+          this[lyr["options"]["layerName"]].addData(features);
+          }
+          })
+        }
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_kabkota = document.createElement('div');
+            div_kabkota.id = "div_kabkota";
+            div_kabkota.className= "filterselect";
+            document.getElementById("menu").appendChild(div_kabkota);
+            sel_kabkota = document.createElement('select');
+            sel_kabkota.multiple = true;
+            sel_kabkota.size = 10;
+            sel_kabkota.id = "sel_kabkota";
+            var kabkota_options_str = "<option value='' unselected></option>";
+            sel_kabkota.onchange = function(){filterFunc()};
+            kabkota_options_str  += '<option value="Bangkalan">Bangkalan</option>';
+            kabkota_options_str  += '<option value="Banyuwangi">Banyuwangi</option>';
+            kabkota_options_str  += '<option value="Batu">Batu</option>';
+            kabkota_options_str  += '<option value="Blitar">Blitar</option>';
+            kabkota_options_str  += '<option value="Bojonegoro">Bojonegoro</option>';
+            kabkota_options_str  += '<option value="Bondowoso">Bondowoso</option>';
+            kabkota_options_str  += '<option value="Gresik">Gresik</option>';
+            kabkota_options_str  += '<option value="Jember">Jember</option>';
+            kabkota_options_str  += '<option value="Jombang">Jombang</option>';
+            kabkota_options_str  += '<option value="Kediri">Kediri</option>';
+            kabkota_options_str  += '<option value="Kota Blitar">Kota Blitar</option>';
+            kabkota_options_str  += '<option value="Kota Kediri">Kota Kediri</option>';
+            kabkota_options_str  += '<option value="Kota Madiun">Kota Madiun</option>';
+            kabkota_options_str  += '<option value="Kota Malang">Kota Malang</option>';
+            kabkota_options_str  += '<option value="Kota Mojokerto">Kota Mojokerto</option>';
+            kabkota_options_str  += '<option value="Kota Pasuruan">Kota Pasuruan</option>';
+            kabkota_options_str  += '<option value="Kota Probolinggo">Kota Probolinggo</option>';
+            kabkota_options_str  += '<option value="Lamongan">Lamongan</option>';
+            kabkota_options_str  += '<option value="Lumajang">Lumajang</option>';
+            kabkota_options_str  += '<option value="Madiun">Madiun</option>';
+            kabkota_options_str  += '<option value="Magetan">Magetan</option>';
+            kabkota_options_str  += '<option value="Malang">Malang</option>';
+            kabkota_options_str  += '<option value="Mojokerto">Mojokerto</option>';
+            kabkota_options_str  += '<option value="Nganjuk">Nganjuk</option>';
+            kabkota_options_str  += '<option value="Ngawi">Ngawi</option>';
+            kabkota_options_str  += '<option value="Pacitan">Pacitan</option>';
+            kabkota_options_str  += '<option value="Pamekasan">Pamekasan</option>';
+            kabkota_options_str  += '<option value="Pasuruan">Pasuruan</option>';
+            kabkota_options_str  += '<option value="Ponorogo">Ponorogo</option>';
+            kabkota_options_str  += '<option value="Probolinggo">Probolinggo</option>';
+            kabkota_options_str  += '<option value="Sampang">Sampang</option>';
+            kabkota_options_str  += '<option value="Sidoarjo">Sidoarjo</option>';
+            kabkota_options_str  += '<option value="Situbondo">Situbondo</option>';
+            kabkota_options_str  += '<option value="Sumenep">Sumenep</option>';
+            kabkota_options_str  += '<option value="Surabaya">Surabaya</option>';
+            kabkota_options_str  += '<option value="Trenggalek">Trenggalek</option>';
+            kabkota_options_str  += '<option value="Tuban">Tuban</option>';
+            kabkota_options_str  += '<option value="Tulungagung">Tulungagung</option>';
+            sel_kabkota.innerHTML = kabkota_options_str;
+            div_kabkota.appendChild(sel_kabkota);
+            var lab_kabkota = document.createElement('div');
+            lab_kabkota.innerHTML = 'kab/kota';
+            lab_kabkota.className = 'filterlabel';
+            div_kabkota.appendChild(lab_kabkota);
+            var reset_kabkota = document.createElement('div');
+            reset_kabkota.innerHTML = 'clear filter';
+            reset_kabkota.className = 'filterlabel';
+            reset_kabkota.onclick = function() {
+                var options = document.getElementById("sel_kabkota").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_kabkota.appendChild(reset_kabkota);
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_kecamatan = document.createElement('div');
+            div_kecamatan.id = "div_kecamatan";
+            div_kecamatan.className= "filterselect";
+            document.getElementById("menu").appendChild(div_kecamatan);
+            sel_kecamatan = document.createElement('select');
+            sel_kecamatan.multiple = true;
+            sel_kecamatan.size = 10;
+            sel_kecamatan.id = "sel_kecamatan";
+            var kecamatan_options_str = "<option value='' unselected></option>";
+            sel_kecamatan.onchange = function(){filterFunc()};
+            kecamatan_options_str  += '<option value="Ajung">Ajung</option>';
+            kecamatan_options_str  += '<option value="Ambulu">Ambulu</option>';
+            kecamatan_options_str  += '<option value="Ambunten">Ambunten</option>';
+            kecamatan_options_str  += '<option value="Ampelgading">Ampelgading</option>';
+            kecamatan_options_str  += '<option value="Arjasa">Arjasa</option>';
+            kecamatan_options_str  += '<option value="Arjosari">Arjosari</option>';
+            kecamatan_options_str  += '<option value="Arosbaya">Arosbaya</option>';
+            kecamatan_options_str  += '<option value="Asembagus">Asembagus</option>';
+            kecamatan_options_str  += '<option value="Asemrowo">Asemrowo</option>';
+            kecamatan_options_str  += '<option value="Babadan">Babadan</option>';
+            kecamatan_options_str  += '<option value="Babat">Babat</option>';
+            kecamatan_options_str  += '<option value="Badas">Badas</option>';
+            kecamatan_options_str  += '<option value="Badegan">Badegan</option>';
+            kecamatan_options_str  += '<option value="Bagor">Bagor</option>';
+            kecamatan_options_str  += '<option value="Bakung">Bakung</option>';
+            kecamatan_options_str  += '<option value="Balen">Balen</option>';
+            kecamatan_options_str  += '<option value="Balerejo">Balerejo</option>';
+            kecamatan_options_str  += '<option value="Balong">Balong</option>';
+            kecamatan_options_str  += '<option value="Balong Bendo">Balong Bendo</option>';
+            kecamatan_options_str  += '<option value="Balongpanggang">Balongpanggang</option>';
+            kecamatan_options_str  += '<option value="Balung">Balung</option>';
+            kecamatan_options_str  += '<option value="Bancar">Bancar</option>';
+            kecamatan_options_str  += '<option value="Bandar">Bandar</option>';
+            kecamatan_options_str  += '<option value="Bandar Kedung Mulyo">Bandar Kedung Mulyo</option>';
+            kecamatan_options_str  += '<option value="Bandung">Bandung</option>';
+            kecamatan_options_str  += '<option value="Bangil">Bangil</option>';
+            kecamatan_options_str  += '<option value="Bangilan">Bangilan</option>';
+            kecamatan_options_str  += '<option value="Bangkalan">Bangkalan</option>';
+            kecamatan_options_str  += '<option value="Bangorejo">Bangorejo</option>';
+            kecamatan_options_str  += '<option value="Bangsal">Bangsal</option>';
+            kecamatan_options_str  += '<option value="Bangsalsari">Bangsalsari</option>';
+            kecamatan_options_str  += '<option value="Bantaran">Bantaran</option>';
+            kecamatan_options_str  += '<option value="Bantur">Bantur</option>';
+            kecamatan_options_str  += '<option value="Banyakan">Banyakan</option>';
+            kecamatan_options_str  += '<option value="Banyuanyar">Banyuanyar</option>';
+            kecamatan_options_str  += '<option value="Banyuates">Banyuates</option>';
+            kecamatan_options_str  += '<option value="Banyuglugur">Banyuglugur</option>';
+            kecamatan_options_str  += '<option value="Banyuputih">Banyuputih</option>';
+            kecamatan_options_str  += '<option value="Banyuwangi">Banyuwangi</option>';
+            kecamatan_options_str  += '<option value="Barat">Barat</option>';
+            kecamatan_options_str  += '<option value="Bareng">Bareng</option>';
+            kecamatan_options_str  += '<option value="Baron">Baron</option>';
+            kecamatan_options_str  += '<option value="Batang Batang">Batang Batang</option>';
+            kecamatan_options_str  += '<option value="Batu">Batu</option>';
+            kecamatan_options_str  += '<option value="Batu Marmar">Batu Marmar</option>';
+            kecamatan_options_str  += '<option value="Batuan">Batuan</option>';
+            kecamatan_options_str  += '<option value="Batuputih">Batuputih</option>';
+            kecamatan_options_str  += '<option value="Baureno">Baureno</option>';
+            kecamatan_options_str  += '<option value="Beji">Beji</option>';
+            kecamatan_options_str  += '<option value="Bendo">Bendo</option>';
+            kecamatan_options_str  += '<option value="Bendungan">Bendungan</option>';
+            kecamatan_options_str  += '<option value="Benjeng">Benjeng</option>';
+            kecamatan_options_str  += '<option value="Benowo">Benowo</option>';
+            kecamatan_options_str  += '<option value="Berbek">Berbek</option>';
+            kecamatan_options_str  += '<option value="Besuk">Besuk</option>';
+            kecamatan_options_str  += '<option value="Besuki">Besuki</option>';
+            kecamatan_options_str  += '<option value="Binakal">Binakal</option>';
+            kecamatan_options_str  += '<option value="Binangun">Binangun</option>';
+            kecamatan_options_str  += '<option value="Blega">Blega</option>';
+            kecamatan_options_str  += '<option value="Blimbing">Blimbing</option>';
+            kecamatan_options_str  += '<option value="Bluluk">Bluluk</option>';
+            kecamatan_options_str  += '<option value="Bluto">Bluto</option>';
+            kecamatan_options_str  += '<option value="Bojonegoro">Bojonegoro</option>';
+            kecamatan_options_str  += '<option value="Bondowoso">Bondowoso</option>';
+            kecamatan_options_str  += '<option value="Botolinggo">Botolinggo</option>';
+            kecamatan_options_str  += '<option value="Boyolangu">Boyolangu</option>';
+            kecamatan_options_str  += '<option value="Bringin">Bringin</option>';
+            kecamatan_options_str  += '<option value="Brondong">Brondong</option>';
+            kecamatan_options_str  += '<option value="Bubulan">Bubulan</option>';
+            kecamatan_options_str  += '<option value="Bubutan">Bubutan</option>';
+            kecamatan_options_str  += '<option value="Buduran">Buduran</option>';
+            kecamatan_options_str  += '<option value="Bugulkidul">Bugulkidul</option>';
+            kecamatan_options_str  += '<option value="Bulak">Bulak</option>';
+            kecamatan_options_str  += '<option value="Bululawang">Bululawang</option>';
+            kecamatan_options_str  += '<option value="Bumiaji">Bumiaji</option>';
+            kecamatan_options_str  += '<option value="Bungah">Bungah</option>';
+            kecamatan_options_str  += '<option value="Bungatan">Bungatan</option>';
+            kecamatan_options_str  += '<option value="Bungkal">Bungkal</option>';
+            kecamatan_options_str  += '<option value="Burneh">Burneh</option>';
+            kecamatan_options_str  += '<option value="Camplong">Camplong</option>';
+            kecamatan_options_str  += '<option value="Campur Darat">Campur Darat</option>';
+            kecamatan_options_str  += '<option value="Candi">Candi</option>';
+            kecamatan_options_str  += '<option value="Candipuro">Candipuro</option>';
+            kecamatan_options_str  += '<option value="Cerme">Cerme</option>';
+            kecamatan_options_str  += '<option value="Cermee">Cermee</option>';
+            kecamatan_options_str  += '<option value="Cluring">Cluring</option>';
+            kecamatan_options_str  += '<option value="Curah Dami">Curah Dami</option>';
+            kecamatan_options_str  += '<option value="Dagangan">Dagangan</option>';
+            kecamatan_options_str  += '<option value="Dampit">Dampit</option>';
+            kecamatan_options_str  += '<option value="Danau/Waduk">Danau/Waduk</option>';
+            kecamatan_options_str  += '<option value="Dander">Dander</option>';
+            kecamatan_options_str  += '<option value="Dasuk">Dasuk</option>';
+            kecamatan_options_str  += '<option value="Dau">Dau</option>';
+            kecamatan_options_str  += '<option value="Dawar Blandong">Dawar Blandong</option>';
+            kecamatan_options_str  += '<option value="Deket">Deket</option>';
+            kecamatan_options_str  += '<option value="Diwek">Diwek</option>';
+            kecamatan_options_str  += '<option value="Dlanggu">Dlanggu</option>';
+            kecamatan_options_str  += '<option value="Doko">Doko</option>';
+            kecamatan_options_str  += '<option value="Dolopo">Dolopo</option>';
+            kecamatan_options_str  += '<option value="Dongko">Dongko</option>';
+            kecamatan_options_str  += '<option value="Donomulyo">Donomulyo</option>';
+            kecamatan_options_str  += '<option value="Donorojo">Donorojo</option>';
+            kecamatan_options_str  += '<option value="Dringu">Dringu</option>';
+            kecamatan_options_str  += '<option value="Driyorejo">Driyorejo</option>';
+            kecamatan_options_str  += '<option value="Duduksampeyan">Duduksampeyan</option>';
+            kecamatan_options_str  += '<option value="Dukuh Pakis">Dukuh Pakis</option>';
+            kecamatan_options_str  += '<option value="Dukun">Dukun</option>';
+            kecamatan_options_str  += '<option value="Dungkek">Dungkek</option>';
+            kecamatan_options_str  += '<option value="Durenan">Durenan</option>';
+            kecamatan_options_str  += '<option value="Gading">Gading</option>';
+            kecamatan_options_str  += '<option value="Gadingrejo">Gadingrejo</option>';
+            kecamatan_options_str  += '<option value="Galis">Galis</option>';
+            kecamatan_options_str  += '<option value="Gambiran">Gambiran</option>';
+            kecamatan_options_str  += '<option value="Gampengrejo">Gampengrejo</option>';
+            kecamatan_options_str  += '<option value="Ganding">Ganding</option>';
+            kecamatan_options_str  += '<option value="Gandusari">Gandusari</option>';
+            kecamatan_options_str  += '<option value="Gapura">Gapura</option>';
+            kecamatan_options_str  += '<option value="Garum">Garum</option>';
+            kecamatan_options_str  += '<option value="Gayam">Gayam</option>';
+            kecamatan_options_str  += '<option value="Gayungan">Gayungan</option>';
+            kecamatan_options_str  += '<option value="Gedangan">Gedangan</option>';
+            kecamatan_options_str  += '<option value="Gedek">Gedek</option>';
+            kecamatan_options_str  += '<option value="Geger">Geger</option>';
+            kecamatan_options_str  += '<option value="Gemarang">Gemarang</option>';
+            kecamatan_options_str  += '<option value="Gempol">Gempol</option>';
+            kecamatan_options_str  += '<option value="Gending">Gending</option>';
+            kecamatan_options_str  += '<option value="Geneng">Geneng</option>';
+            kecamatan_options_str  += '<option value="Genteng">Genteng</option>';
+            kecamatan_options_str  += '<option value="Gerih">Gerih</option>';
+            kecamatan_options_str  += '<option value="Giligenteng">Giligenteng</option>';
+            kecamatan_options_str  += '<option value="Giri">Giri</option>';
+            kecamatan_options_str  += '<option value="Glagah">Glagah</option>';
+            kecamatan_options_str  += '<option value="Glenmore">Glenmore</option>';
+            kecamatan_options_str  += '<option value="Gondang">Gondang</option>';
+            kecamatan_options_str  += '<option value="Gondang Wetan">Gondang Wetan</option>';
+            kecamatan_options_str  += '<option value="Gondanglegi">Gondanglegi</option>';
+            kecamatan_options_str  += '<option value="Grabagan">Grabagan</option>';
+            kecamatan_options_str  += '<option value="Grati">Grati</option>';
+            kecamatan_options_str  += '<option value="Gresik">Gresik</option>';
+            kecamatan_options_str  += '<option value="Grogol">Grogol</option>';
+            kecamatan_options_str  += '<option value="Grujugan">Grujugan</option>';
+            kecamatan_options_str  += '<option value="Gubeng">Gubeng</option>';
+            kecamatan_options_str  += '<option value="Gucialit">Gucialit</option>';
+            kecamatan_options_str  += '<option value="Gudo">Gudo</option>';
+            kecamatan_options_str  += '<option value="Guluk Guluk">Guluk Guluk</option>';
+            kecamatan_options_str  += '<option value="Gumuk Mas">Gumuk Mas</option>';
+            kecamatan_options_str  += '<option value="Gunung Anyar">Gunung Anyar</option>';
+            kecamatan_options_str  += '<option value="Gurah">Gurah</option>';
+            kecamatan_options_str  += '<option value="Jabon">Jabon</option>';
+            kecamatan_options_str  += '<option value="Jabung">Jabung</option>';
+            kecamatan_options_str  += '<option value="Jambangan">Jambangan</option>';
+            kecamatan_options_str  += '<option value="Jambesari Darus Sholah">Jambesari Darus Sholah</option>';
+            kecamatan_options_str  += '<option value="Jambon">Jambon</option>';
+            kecamatan_options_str  += '<option value="Jangkar">Jangkar</option>';
+            kecamatan_options_str  += '<option value="Jatibanteng">Jatibanteng</option>';
+            kecamatan_options_str  += '<option value="Jatikalen">Jatikalen</option>';
+            kecamatan_options_str  += '<option value="Jatirejo">Jatirejo</option>';
+            kecamatan_options_str  += '<option value="Jatirogo">Jatirogo</option>';
+            kecamatan_options_str  += '<option value="Jatiroto">Jatiroto</option>';
+            kecamatan_options_str  += '<option value="Jelbuk">Jelbuk</option>';
+            kecamatan_options_str  += '<option value="Jenangan">Jenangan</option>';
+            kecamatan_options_str  += '<option value="Jenggawah">Jenggawah</option>';
+            kecamatan_options_str  += '<option value="Jenu">Jenu</option>';
+            kecamatan_options_str  += '<option value="Jetis">Jetis</option>';
+            kecamatan_options_str  += '<option value="Jiwan">Jiwan</option>';
+            kecamatan_options_str  += '<option value="Jogo Roto">Jogo Roto</option>';
+            kecamatan_options_str  += '<option value="Jogorogo">Jogorogo</option>';
+            kecamatan_options_str  += '<option value="Jombang">Jombang</option>';
+            kecamatan_options_str  += '<option value="Jrengik">Jrengik</option>';
+            kecamatan_options_str  += '<option value="Junrejo">Junrejo</option>';
+            kecamatan_options_str  += '<option value="Kabat">Kabat</option>';
+            kecamatan_options_str  += '<option value="Kabuh">Kabuh</option>';
+            kecamatan_options_str  += '<option value="Kademangan">Kademangan</option>';
+            kecamatan_options_str  += '<option value="Kadur">Kadur</option>';
+            kecamatan_options_str  += '<option value="Kalianget">Kalianget</option>';
+            kecamatan_options_str  += '<option value="Kalibaru">Kalibaru</option>';
+            kecamatan_options_str  += '<option value="Kalidawir">Kalidawir</option>';
+            kecamatan_options_str  += '<option value="Kalipare">Kalipare</option>';
+            kecamatan_options_str  += '<option value="Kalipuro">Kalipuro</option>';
+            kecamatan_options_str  += '<option value="Kalisat">Kalisat</option>';
+            kecamatan_options_str  += '<option value="Kalitengah">Kalitengah</option>';
+            kecamatan_options_str  += '<option value="Kalitidu">Kalitidu</option>';
+            kecamatan_options_str  += '<option value="Kaliwates">Kaliwates</option>';
+            kecamatan_options_str  += '<option value="Kamal">Kamal</option>';
+            kecamatan_options_str  += '<option value="Kampak">Kampak</option>';
+            kecamatan_options_str  += '<option value="Kandangan">Kandangan</option>';
+            kecamatan_options_str  += '<option value="Kandat">Kandat</option>';
+            kecamatan_options_str  += '<option value="Kangayan">Kangayan</option>';
+            kecamatan_options_str  += '<option value="Kanigaran">Kanigaran</option>';
+            kecamatan_options_str  += '<option value="Kanigoro">Kanigoro</option>';
+            kecamatan_options_str  += '<option value="Kanor">Kanor</option>';
+            kecamatan_options_str  += '<option value="Kapas">Kapas</option>';
+            kecamatan_options_str  += '<option value="Kapongan">Kapongan</option>';
+            kecamatan_options_str  += '<option value="Karang Geneng">Karang Geneng</option>';
+            kecamatan_options_str  += '<option value="Karang Penang">Karang Penang</option>';
+            kecamatan_options_str  += '<option value="Karang Pilang">Karang Pilang</option>';
+            kecamatan_options_str  += '<option value="Karangan">Karangan</option>';
+            kecamatan_options_str  += '<option value="Karanganyar">Karanganyar</option>';
+            kecamatan_options_str  += '<option value="Karangbinangun">Karangbinangun</option>';
+            kecamatan_options_str  += '<option value="Karangjati">Karangjati</option>';
+            kecamatan_options_str  += '<option value="Karangploso">Karangploso</option>';
+            kecamatan_options_str  += '<option value="Karangrejo">Karangrejo</option>';
+            kecamatan_options_str  += '<option value="Karas">Karas</option>';
+            kecamatan_options_str  += '<option value="Kare">Kare</option>';
+            kecamatan_options_str  += '<option value="Kartoharjo">Kartoharjo</option>';
+            kecamatan_options_str  += '<option value="Kasembon">Kasembon</option>';
+            kecamatan_options_str  += '<option value="Kasiman">Kasiman</option>';
+            kecamatan_options_str  += '<option value="Kasreman">Kasreman</option>';
+            kecamatan_options_str  += '<option value="Kauman">Kauman</option>';
+            kecamatan_options_str  += '<option value="Kawedanan">Kawedanan</option>';
+            kecamatan_options_str  += '<option value="Kayen Kidul">Kayen Kidul</option>';
+            kecamatan_options_str  += '<option value="Kebomas">Kebomas</option>';
+            kecamatan_options_str  += '<option value="Kebonagung">Kebonagung</option>';
+            kecamatan_options_str  += '<option value="Kebonsari">Kebonsari</option>';
+            kecamatan_options_str  += '<option value="Kedamean">Kedamean</option>';
+            kecamatan_options_str  += '<option value="Kedewan">Kedewan</option>';
+            kecamatan_options_str  += '<option value="Kedopok">Kedopok</option>';
+            kecamatan_options_str  += '<option value="Kedungadem">Kedungadem</option>';
+            kecamatan_options_str  += '<option value="Kedungdung">Kedungdung</option>';
+            kecamatan_options_str  += '<option value="Kedunggalar">Kedunggalar</option>';
+            kecamatan_options_str  += '<option value="Kedungjajang">Kedungjajang</option>';
+            kecamatan_options_str  += '<option value="Kedungkandang">Kedungkandang</option>';
+            kecamatan_options_str  += '<option value="Kedungpring">Kedungpring</option>';
+            kecamatan_options_str  += '<option value="Kedungwaru">Kedungwaru</option>';
+            kecamatan_options_str  += '<option value="Kejayan">Kejayan</option>';
+            kecamatan_options_str  += '<option value="Kembangbahu">Kembangbahu</option>';
+            kecamatan_options_str  += '<option value="Kemlagi">Kemlagi</option>';
+            kecamatan_options_str  += '<option value="Kencong">Kencong</option>';
+            kecamatan_options_str  += '<option value="Kendal">Kendal</option>';
+            kecamatan_options_str  += '<option value="Kendit">Kendit</option>';
+            kecamatan_options_str  += '<option value="Kenduruan">Kenduruan</option>';
+            kecamatan_options_str  += '<option value="Kenjeran">Kenjeran</option>';
+            kecamatan_options_str  += '<option value="Kepanjen">Kepanjen</option>';
+            kecamatan_options_str  += '<option value="Kepanjenkidul">Kepanjenkidul</option>';
+            kecamatan_options_str  += '<option value="Kepoh Baru">Kepoh Baru</option>';
+            kecamatan_options_str  += '<option value="Kepung">Kepung</option>';
+            kecamatan_options_str  += '<option value="Kerek">Kerek</option>';
+            kecamatan_options_str  += '<option value="Kertosono">Kertosono</option>';
+            kecamatan_options_str  += '<option value="Kesamben">Kesamben</option>';
+            kecamatan_options_str  += '<option value="Ketapang">Ketapang</option>';
+            kecamatan_options_str  += '<option value="Klabang">Klabang</option>';
+            kecamatan_options_str  += '<option value="Klakah">Klakah</option>';
+            kecamatan_options_str  += '<option value="Klampis">Klampis</option>';
+            kecamatan_options_str  += '<option value="Klojen">Klojen</option>';
+            kecamatan_options_str  += '<option value="Kokop">Kokop</option>';
+            kecamatan_options_str  += '<option value="Konang">Konang</option>';
+            kecamatan_options_str  += '<option value="Kota Kediri">Kota Kediri</option>';
+            kecamatan_options_str  += '<option value="Kotaanyar">Kotaanyar</option>';
+            kecamatan_options_str  += '<option value="Kotasumenep">Kotasumenep</option>';
+            kecamatan_options_str  += '<option value="Kraksaan">Kraksaan</option>';
+            kecamatan_options_str  += '<option value="Kras">Kras</option>';
+            kecamatan_options_str  += '<option value="Kraton">Kraton</option>';
+            kecamatan_options_str  += '<option value="Krejengan">Krejengan</option>';
+            kecamatan_options_str  += '<option value="Krembangan">Krembangan</option>';
+            kecamatan_options_str  += '<option value="Krembung">Krembung</option>';
+            kecamatan_options_str  += '<option value="Krian">Krian</option>';
+            kecamatan_options_str  += '<option value="Kromengan">Kromengan</option>';
+            kecamatan_options_str  += '<option value="Krucil">Krucil</option>';
+            kecamatan_options_str  += '<option value="Kudu">Kudu</option>';
+            kecamatan_options_str  += '<option value="Kunir">Kunir</option>';
+            kecamatan_options_str  += '<option value="Kunjang">Kunjang</option>';
+            kecamatan_options_str  += '<option value="Kuripan">Kuripan</option>';
+            kecamatan_options_str  += '<option value="Kutorejo">Kutorejo</option>';
+            kecamatan_options_str  += '<option value="Kwadungan">Kwadungan</option>';
+            kecamatan_options_str  += '<option value="Kwanyar">Kwanyar</option>';
+            kecamatan_options_str  += '<option value="Labang">Labang</option>';
+            kecamatan_options_str  += '<option value="Lakarsantri">Lakarsantri</option>';
+            kecamatan_options_str  += '<option value="Lamongan">Lamongan</option>';
+            kecamatan_options_str  += '<option value="Larangan">Larangan</option>';
+            kecamatan_options_str  += '<option value="Laren">Laren</option>';
+            kecamatan_options_str  += '<option value="Lawang">Lawang</option>';
+            kecamatan_options_str  += '<option value="Leces">Leces</option>';
+            kecamatan_options_str  += '<option value="Ledokombo">Ledokombo</option>';
+            kecamatan_options_str  += '<option value="Lekok">Lekok</option>';
+            kecamatan_options_str  += '<option value="Lembeyan">Lembeyan</option>';
+            kecamatan_options_str  += '<option value="Lengkong">Lengkong</option>';
+            kecamatan_options_str  += '<option value="Lenteng">Lenteng</option>';
+            kecamatan_options_str  += '<option value="Licin">Licin</option>';
+            kecamatan_options_str  += '<option value="Loceret">Loceret</option>';
+            kecamatan_options_str  += '<option value="Lowokwaru">Lowokwaru</option>';
+            kecamatan_options_str  += '<option value="Lumajang">Lumajang</option>';
+            kecamatan_options_str  += '<option value="Lumbang">Lumbang</option>';
+            kecamatan_options_str  += '<option value="Madiun">Madiun</option>';
+            kecamatan_options_str  += '<option value="Maduran">Maduran</option>';
+            kecamatan_options_str  += '<option value="Maesan">Maesan</option>';
+            kecamatan_options_str  += '<option value="Magersari">Magersari</option>';
+            kecamatan_options_str  += '<option value="Magetan">Magetan</option>';
+            kecamatan_options_str  += '<option value="Malo">Malo</option>';
+            kecamatan_options_str  += '<option value="Manding">Manding</option>';
+            kecamatan_options_str  += '<option value="Mangaran">Mangaran</option>';
+            kecamatan_options_str  += '<option value="Mangu Harjo">Mangu Harjo</option>';
+            kecamatan_options_str  += '<option value="Mantingan">Mantingan</option>';
+            kecamatan_options_str  += '<option value="Mantup">Mantup</option>';
+            kecamatan_options_str  += '<option value="Manyar">Manyar</option>';
+            kecamatan_options_str  += '<option value="Maospati">Maospati</option>';
+            kecamatan_options_str  += '<option value="Margomulyo">Margomulyo</option>';
+            kecamatan_options_str  += '<option value="Maron">Maron</option>';
+            kecamatan_options_str  += '<option value="Mayang">Mayang</option>';
+            kecamatan_options_str  += '<option value="Mayangan">Mayangan</option>';
+            kecamatan_options_str  += '<option value="Megaluh">Megaluh</option>';
+            kecamatan_options_str  += '<option value="Mejayan">Mejayan</option>';
+            kecamatan_options_str  += '<option value="Menganti">Menganti</option>';
+            kecamatan_options_str  += '<option value="Merakurak">Merakurak</option>';
+            kecamatan_options_str  += '<option value="Mlandingan">Mlandingan</option>';
+            kecamatan_options_str  += '<option value="Mlarak">Mlarak</option>';
+            kecamatan_options_str  += '<option value="Modo">Modo</option>';
+            kecamatan_options_str  += '<option value="Modung">Modung</option>';
+            kecamatan_options_str  += '<option value="Mojo">Mojo</option>';
+            kecamatan_options_str  += '<option value="Mojoagung">Mojoagung</option>';
+            kecamatan_options_str  += '<option value="Mojoanyar">Mojoanyar</option>';
+            kecamatan_options_str  += '<option value="Mojoroto">Mojoroto</option>';
+            kecamatan_options_str  += '<option value="Mojosari">Mojosari</option>';
+            kecamatan_options_str  += '<option value="Mojowarno">Mojowarno</option>';
+            kecamatan_options_str  += '<option value="Montong">Montong</option>';
+            kecamatan_options_str  += '<option value="Mulyorejo">Mulyorejo</option>';
+            kecamatan_options_str  += '<option value="Mumbulsari">Mumbulsari</option>';
+            kecamatan_options_str  += '<option value="Muncar">Muncar</option>';
+            kecamatan_options_str  += '<option value="Munjungan">Munjungan</option>';
+            kecamatan_options_str  += '<option value="Nawangan">Nawangan</option>';
+            kecamatan_options_str  += '<option value="Ngadiluwih">Ngadiluwih</option>';
+            kecamatan_options_str  += '<option value="Ngadirojo">Ngadirojo</option>';
+            kecamatan_options_str  += '<option value="Ngajum">Ngajum</option>';
+            kecamatan_options_str  += '<option value="Ngambon">Ngambon</option>';
+            kecamatan_options_str  += '<option value="Ngancar">Ngancar</option>';
+            kecamatan_options_str  += '<option value="Nganjuk">Nganjuk</option>';
+            kecamatan_options_str  += '<option value="Ngantang">Ngantang</option>';
+            kecamatan_options_str  += '<option value="Ngantru">Ngantru</option>';
+            kecamatan_options_str  += '<option value="Ngariboyo">Ngariboyo</option>';
+            kecamatan_options_str  += '<option value="Ngasem">Ngasem</option>';
+            kecamatan_options_str  += '<option value="Ngawi">Ngawi</option>';
+            kecamatan_options_str  += '<option value="Ngebel">Ngebel</option>';
+            kecamatan_options_str  += '<option value="Ngetos">Ngetos</option>';
+            kecamatan_options_str  += '<option value="Ngimbang">Ngimbang</option>';
+            kecamatan_options_str  += '<option value="Nglegok">Nglegok</option>';
+            kecamatan_options_str  += '<option value="Ngluyu">Ngluyu</option>';
+            kecamatan_options_str  += '<option value="Ngoro">Ngoro</option>';
+            kecamatan_options_str  += '<option value="Ngraho">Ngraho</option>';
+            kecamatan_options_str  += '<option value="Ngrambe">Ngrambe</option>';
+            kecamatan_options_str  += '<option value="Ngrayun">Ngrayun</option>';
+            kecamatan_options_str  += '<option value="Ngronggot">Ngronggot</option>';
+            kecamatan_options_str  += '<option value="Nguling">Nguling</option>';
+            kecamatan_options_str  += '<option value="Nguntoronadi">Nguntoronadi</option>';
+            kecamatan_options_str  += '<option value="Ngunut">Ngunut</option>';
+            kecamatan_options_str  += '<option value="Ngusikan">Ngusikan</option>';
+            kecamatan_options_str  += '<option value="Nonggunong">Nonggunong</option>';
+            kecamatan_options_str  += '<option value="Omben">Omben</option>';
+            kecamatan_options_str  += '<option value="Pabean Cantian">Pabean Cantian</option>';
+            kecamatan_options_str  += '<option value="Pace">Pace</option>';
+            kecamatan_options_str  += '<option value="Pacet">Pacet</option>';
+            kecamatan_options_str  += '<option value="Paciran">Paciran</option>';
+            kecamatan_options_str  += '<option value="Pacitan">Pacitan</option>';
+            kecamatan_options_str  += '<option value="Padang">Padang</option>';
+            kecamatan_options_str  += '<option value="Padangan">Padangan</option>';
+            kecamatan_options_str  += '<option value="Padas">Padas</option>';
+            kecamatan_options_str  += '<option value="Pademawu">Pademawu</option>';
+            kecamatan_options_str  += '<option value="Pagak">Pagak</option>';
+            kecamatan_options_str  += '<option value="Pagelaran">Pagelaran</option>';
+            kecamatan_options_str  += '<option value="Pagerwojo">Pagerwojo</option>';
+            kecamatan_options_str  += '<option value="Pagu">Pagu</option>';
+            kecamatan_options_str  += '<option value="Paiton">Paiton</option>';
+            kecamatan_options_str  += '<option value="Pajarakan">Pajarakan</option>';
+            kecamatan_options_str  += '<option value="Pakal">Pakal</option>';
+            kecamatan_options_str  += '<option value="Pakel">Pakel</option>';
+            kecamatan_options_str  += '<option value="Pakem">Pakem</option>';
+            kecamatan_options_str  += '<option value="Pakis">Pakis</option>';
+            kecamatan_options_str  += '<option value="Pakisaji">Pakisaji</option>';
+            kecamatan_options_str  += '<option value="Pakong">Pakong</option>';
+            kecamatan_options_str  += '<option value="Pakuniran">Pakuniran</option>';
+            kecamatan_options_str  += '<option value="Pakusari">Pakusari</option>';
+            kecamatan_options_str  += '<option value="Palang">Palang</option>';
+            kecamatan_options_str  += '<option value="Palengaan">Palengaan</option>';
+            kecamatan_options_str  += '<option value="Pamekasan">Pamekasan</option>';
+            kecamatan_options_str  += '<option value="Panarukan">Panarukan</option>';
+            kecamatan_options_str  += '<option value="Panceng">Panceng</option>';
+            kecamatan_options_str  += '<option value="Pandaan">Pandaan</option>';
+            kecamatan_options_str  += '<option value="Panekan">Panekan</option>';
+            kecamatan_options_str  += '<option value="Pangarengan">Pangarengan</option>';
+            kecamatan_options_str  += '<option value="Panggul">Panggul</option>';
+            kecamatan_options_str  += '<option value="Panggungrejo">Panggungrejo</option>';
+            kecamatan_options_str  += '<option value="Pangkur">Pangkur</option>';
+            kecamatan_options_str  += '<option value="Panji">Panji</option>';
+            kecamatan_options_str  += '<option value="Panti">Panti</option>';
+            kecamatan_options_str  += '<option value="Papar">Papar</option>';
+            kecamatan_options_str  += '<option value="Parang">Parang</option>';
+            kecamatan_options_str  += '<option value="Pare">Pare</option>';
+            kecamatan_options_str  += '<option value="Parengan">Parengan</option>';
+            kecamatan_options_str  += '<option value="Paron">Paron</option>';
+            kecamatan_options_str  += '<option value="Pasean">Pasean</option>';
+            kecamatan_options_str  += '<option value="Pasirian">Pasirian</option>';
+            kecamatan_options_str  += '<option value="Pasongsongan">Pasongsongan</option>';
+            kecamatan_options_str  += '<option value="Pasrepan">Pasrepan</option>';
+            kecamatan_options_str  += '<option value="Pasrujambe">Pasrujambe</option>';
+            kecamatan_options_str  += '<option value="Patianrowo">Patianrowo</option>';
+            kecamatan_options_str  += '<option value="Patrang">Patrang</option>';
+            kecamatan_options_str  += '<option value="Pegantenan">Pegantenan</option>';
+            kecamatan_options_str  += '<option value="Perak">Perak</option>';
+            kecamatan_options_str  += '<option value="Pesanggaran">Pesanggaran</option>';
+            kecamatan_options_str  += '<option value="Pesantren">Pesantren</option>';
+            kecamatan_options_str  += '<option value="Peterongan">Peterongan</option>';
+            kecamatan_options_str  += '<option value="Pilangkenceng">Pilangkenceng</option>';
+            kecamatan_options_str  += '<option value="Pitu">Pitu</option>';
+            kecamatan_options_str  += '<option value="Plandaan">Plandaan</option>';
+            kecamatan_options_str  += '<option value="Plaosan">Plaosan</option>';
+            kecamatan_options_str  += '<option value="Plemahan">Plemahan</option>';
+            kecamatan_options_str  += '<option value="Ploso">Ploso</option>';
+            kecamatan_options_str  += '<option value="Plosoklaten">Plosoklaten</option>';
+            kecamatan_options_str  += '<option value="Plumpang">Plumpang</option>';
+            kecamatan_options_str  += '<option value="Pogalan">Pogalan</option>';
+            kecamatan_options_str  += '<option value="Pohjentrek">Pohjentrek</option>';
+            kecamatan_options_str  += '<option value="Poncokusumo">Poncokusumo</option>';
+            kecamatan_options_str  += '<option value="Poncol">Poncol</option>';
+            kecamatan_options_str  += '<option value="Ponggok">Ponggok</option>';
+            kecamatan_options_str  += '<option value="Ponorogo">Ponorogo</option>';
+            kecamatan_options_str  += '<option value="Porong">Porong</option>';
+            kecamatan_options_str  += '<option value="Pragaan">Pragaan</option>';
+            kecamatan_options_str  += '<option value="Prajekan">Prajekan</option>';
+            kecamatan_options_str  += '<option value="Prajurit Kulon">Prajurit Kulon</option>';
+            kecamatan_options_str  += '<option value="Prambon">Prambon</option>';
+            kecamatan_options_str  += '<option value="Prigen">Prigen</option>';
+            kecamatan_options_str  += '<option value="Pringkuku">Pringkuku</option>';
+            kecamatan_options_str  += '<option value="Pronojiwo">Pronojiwo</option>';
+            kecamatan_options_str  += '<option value="Proppo">Proppo</option>';
+            kecamatan_options_str  += '<option value="Pucang Laban">Pucang Laban</option>';
+            kecamatan_options_str  += '<option value="Pucuk">Pucuk</option>';
+            kecamatan_options_str  += '<option value="Pudak">Pudak</option>';
+            kecamatan_options_str  += '<option value="Puger">Puger</option>';
+            kecamatan_options_str  += '<option value="Pujer">Pujer</option>';
+            kecamatan_options_str  += '<option value="Pujon">Pujon</option>';
+            kecamatan_options_str  += '<option value="Pule">Pule</option>';
+            kecamatan_options_str  += '<option value="Pulung">Pulung</option>';
+            kecamatan_options_str  += '<option value="Puncu">Puncu</option>';
+            kecamatan_options_str  += '<option value="Pungging">Pungging</option>';
+            kecamatan_options_str  += '<option value="Punung">Punung</option>';
+            kecamatan_options_str  += '<option value="Puri">Puri</option>';
+            kecamatan_options_str  += '<option value="Purwoasri">Purwoasri</option>';
+            kecamatan_options_str  += '<option value="Purwodadi">Purwodadi</option>';
+            kecamatan_options_str  += '<option value="Purwoharjo">Purwoharjo</option>';
+            kecamatan_options_str  += '<option value="Purworejo">Purworejo</option>';
+            kecamatan_options_str  += '<option value="Purwosari">Purwosari</option>';
+            kecamatan_options_str  += '<option value="Puspo">Puspo</option>';
+            kecamatan_options_str  += '<option value="Raas">Raas</option>';
+            kecamatan_options_str  += '<option value="Rambipuji">Rambipuji</option>';
+            kecamatan_options_str  += '<option value="Randuagung">Randuagung</option>';
+            kecamatan_options_str  += '<option value="Ranuyoso">Ranuyoso</option>';
+            kecamatan_options_str  += '<option value="Rejoso">Rejoso</option>';
+            kecamatan_options_str  += '<option value="Rejotangan">Rejotangan</option>';
+            kecamatan_options_str  += '<option value="Rembang">Rembang</option>';
+            kecamatan_options_str  += '<option value="Rengel">Rengel</option>';
+            kecamatan_options_str  += '<option value="Ringinrejo">Ringinrejo</option>';
+            kecamatan_options_str  += '<option value="Robatal">Robatal</option>';
+            kecamatan_options_str  += '<option value="Rogojampi">Rogojampi</option>';
+            kecamatan_options_str  += '<option value="Rowokangkung">Rowokangkung</option>';
+            kecamatan_options_str  += '<option value="Rubaru">Rubaru</option>';
+            kecamatan_options_str  += '<option value="Rungkut">Rungkut</option>';
+            kecamatan_options_str  += '<option value="Sambeng">Sambeng</option>';
+            kecamatan_options_str  += '<option value="Sambikerep">Sambikerep</option>';
+            kecamatan_options_str  += '<option value="Sambit">Sambit</option>';
+            kecamatan_options_str  += '<option value="Sampang">Sampang</option>';
+            kecamatan_options_str  += '<option value="Sampung">Sampung</option>';
+            kecamatan_options_str  += '<option value="Sanan Kulon">Sanan Kulon</option>';
+            kecamatan_options_str  += '<option value="Sananwetan">Sananwetan</option>';
+            kecamatan_options_str  += '<option value="Sapeken">Sapeken</option>';
+            kecamatan_options_str  += '<option value="Saradan">Saradan</option>';
+            kecamatan_options_str  += '<option value="Sarirejo">Sarirejo</option>';
+            kecamatan_options_str  += '<option value="Saronggi">Saronggi</option>';
+            kecamatan_options_str  += '<option value="Sawahan">Sawahan</option>';
+            kecamatan_options_str  += '<option value="Sawoo">Sawoo</option>';
+            kecamatan_options_str  += '<option value="Sedati">Sedati</option>';
+            kecamatan_options_str  += '<option value="Sekar">Sekar</option>';
+            kecamatan_options_str  += '<option value="Sekaran">Sekaran</option>';
+            kecamatan_options_str  += '<option value="Selopuro">Selopuro</option>';
+            kecamatan_options_str  += '<option value="Selorejo">Selorejo</option>';
+            kecamatan_options_str  += '<option value="Semampir">Semampir</option>';
+            kecamatan_options_str  += '<option value="Semanding">Semanding</option>';
+            kecamatan_options_str  += '<option value="Semboro">Semboro</option>';
+            kecamatan_options_str  += '<option value="Semen">Semen</option>';
+            kecamatan_options_str  += '<option value="Sempol">Sempol</option>';
+            kecamatan_options_str  += '<option value="Sempu">Sempu</option>';
+            kecamatan_options_str  += '<option value="Sendang">Sendang</option>';
+            kecamatan_options_str  += '<option value="Senduro">Senduro</option>';
+            kecamatan_options_str  += '<option value="Senori">Senori</option>';
+            kecamatan_options_str  += '<option value="Sepulu">Sepulu</option>';
+            kecamatan_options_str  += '<option value="Sidayu">Sidayu</option>';
+            kecamatan_options_str  += '<option value="Sidoarjo">Sidoarjo</option>';
+            kecamatan_options_str  += '<option value="Sidorejo">Sidorejo</option>';
+            kecamatan_options_str  += '<option value="Siliragung">Siliragung</option>';
+            kecamatan_options_str  += '<option value="Silo">Silo</option>';
+            kecamatan_options_str  += '<option value="Siman">Siman</option>';
+            kecamatan_options_str  += '<option value="Simokerto">Simokerto</option>';
+            kecamatan_options_str  += '<option value="Sine">Sine</option>';
+            kecamatan_options_str  += '<option value="Singgahan">Singgahan</option>';
+            kecamatan_options_str  += '<option value="Singojuruh">Singojuruh</option>';
+            kecamatan_options_str  += '<option value="Singosari">Singosari</option>';
+            kecamatan_options_str  += '<option value="Situbondo">Situbondo</option>';
+            kecamatan_options_str  += '<option value="Slahung">Slahung</option>';
+            kecamatan_options_str  += '<option value="Socah">Socah</option>';
+            kecamatan_options_str  += '<option value="Soko">Soko</option>';
+            kecamatan_options_str  += '<option value="Sokobanah">Sokobanah</option>';
+            kecamatan_options_str  += '<option value="Solokuro">Solokuro</option>';
+            kecamatan_options_str  += '<option value="Songgon">Songgon</option>';
+            kecamatan_options_str  += '<option value="Sooko">Sooko</option>';
+            kecamatan_options_str  += '<option value="Srengat">Srengat</option>';
+            kecamatan_options_str  += '<option value="Sreseh">Sreseh</option>';
+            kecamatan_options_str  += '<option value="Srono">Srono</option>';
+            kecamatan_options_str  += '<option value="Suboh">Suboh</option>';
+            kecamatan_options_str  += '<option value="Sudimoro">Sudimoro</option>';
+            kecamatan_options_str  += '<option value="Sugihwaras">Sugihwaras</option>';
+            kecamatan_options_str  += '<option value="Sugio">Sugio</option>';
+            kecamatan_options_str  += '<option value="Sukapura">Sukapura</option>';
+            kecamatan_options_str  += '<option value="Suko Manunggal">Suko Manunggal</option>';
+            kecamatan_options_str  += '<option value="Sukodadi">Sukodadi</option>';
+            kecamatan_options_str  += '<option value="Sukodono">Sukodono</option>';
+            kecamatan_options_str  += '<option value="Sukolilo">Sukolilo</option>';
+            kecamatan_options_str  += '<option value="Sukomoro">Sukomoro</option>';
+            kecamatan_options_str  += '<option value="Sukorambi">Sukorambi</option>';
+            kecamatan_options_str  += '<option value="Sukorame">Sukorame</option>';
+            kecamatan_options_str  += '<option value="Sukorejo">Sukorejo</option>';
+            kecamatan_options_str  += '<option value="Sukosari">Sukosari</option>';
+            kecamatan_options_str  += '<option value="Sukosewu">Sukosewu</option>';
+            kecamatan_options_str  += '<option value="Sukowono">Sukowono</option>';
+            kecamatan_options_str  += '<option value="Sukun">Sukun</option>';
+            kecamatan_options_str  += '<option value="Sumber">Sumber</option>';
+            kecamatan_options_str  += '<option value="Sumber Baru">Sumber Baru</option>';
+            kecamatan_options_str  += '<option value="Sumber Pucung">Sumber Pucung</option>';
+            kecamatan_options_str  += '<option value="Sumber Wringin">Sumber Wringin</option>';
+            kecamatan_options_str  += '<option value="Sumberasih">Sumberasih</option>';
+            kecamatan_options_str  += '<option value="Sumberejo">Sumberejo</option>';
+            kecamatan_options_str  += '<option value="Sumbergempol">Sumbergempol</option>';
+            kecamatan_options_str  += '<option value="Sumberjambe">Sumberjambe</option>';
+            kecamatan_options_str  += '<option value="Sumbermalang">Sumbermalang</option>';
+            kecamatan_options_str  += '<option value="Sumbermanjing">Sumbermanjing</option>';
+            kecamatan_options_str  += '<option value="Sumbersari">Sumbersari</option>';
+            kecamatan_options_str  += '<option value="Sumbersuko">Sumbersuko</option>';
+            kecamatan_options_str  += '<option value="Sumobito">Sumobito</option>';
+            kecamatan_options_str  += '<option value="Suruh">Suruh</option>';
+            kecamatan_options_str  += '<option value="Sutojayan">Sutojayan</option>';
+            kecamatan_options_str  += '<option value="Tajinan">Tajinan</option>';
+            kecamatan_options_str  += '<option value="Takeran">Takeran</option>';
+            kecamatan_options_str  += '<option value="Talango">Talango</option>';
+            kecamatan_options_str  += '<option value="Talun">Talun</option>';
+            kecamatan_options_str  += '<option value="Taman">Taman</option>';
+            kecamatan_options_str  += '<option value="Taman Krocok">Taman Krocok</option>';
+            kecamatan_options_str  += '<option value="Tamanan">Tamanan</option>';
+            kecamatan_options_str  += '<option value="Tambakboyo">Tambakboyo</option>';
+            kecamatan_options_str  += '<option value="Tambakrejo">Tambakrejo</option>';
+            kecamatan_options_str  += '<option value="Tambaksari">Tambaksari</option>';
+            kecamatan_options_str  += '<option value="Tambelangan">Tambelangan</option>';
+            kecamatan_options_str  += '<option value="Tanah Merah">Tanah Merah</option>';
+            kecamatan_options_str  += '<option value="Tandes">Tandes</option>';
+            kecamatan_options_str  += '<option value="Tanggul">Tanggul</option>';
+            kecamatan_options_str  += '<option value="Tanggulangin">Tanggulangin</option>';
+            kecamatan_options_str  += '<option value="Tanggung Gunung">Tanggung Gunung</option>';
+            kecamatan_options_str  += '<option value="Tanjunganom">Tanjunganom</option>';
+            kecamatan_options_str  += '<option value="Tanjungbumi">Tanjungbumi</option>';
+            kecamatan_options_str  += '<option value="Tapen">Tapen</option>';
+            kecamatan_options_str  += '<option value="Tarik">Tarik</option>';
+            kecamatan_options_str  += '<option value="Tarokan">Tarokan</option>';
+            kecamatan_options_str  += '<option value="Tegalampel">Tegalampel</option>';
+            kecamatan_options_str  += '<option value="Tegaldlimo">Tegaldlimo</option>';
+            kecamatan_options_str  += '<option value="Tegalombo">Tegalombo</option>';
+            kecamatan_options_str  += '<option value="Tegalsari">Tegalsari</option>';
+            kecamatan_options_str  += '<option value="Tegalsiwalan">Tegalsiwalan</option>';
+            kecamatan_options_str  += '<option value="Tekung">Tekung</option>';
+            kecamatan_options_str  += '<option value="Temayang">Temayang</option>';
+            kecamatan_options_str  += '<option value="Tembelang">Tembelang</option>';
+            kecamatan_options_str  += '<option value="Tempeh">Tempeh</option>';
+            kecamatan_options_str  += '<option value="Tempurejo">Tempurejo</option>';
+            kecamatan_options_str  += '<option value="Tempursari">Tempursari</option>';
+            kecamatan_options_str  += '<option value="Tenggarang">Tenggarang</option>';
+            kecamatan_options_str  += '<option value="Tenggilis Mejoyo">Tenggilis Mejoyo</option>';
+            kecamatan_options_str  += '<option value="Tikung">Tikung</option>';
+            kecamatan_options_str  += '<option value="Tiris">Tiris</option>';
+            kecamatan_options_str  += '<option value="Tirto Yudo">Tirto Yudo</option>';
+            kecamatan_options_str  += '<option value="Tlanakan">Tlanakan</option>';
+            kecamatan_options_str  += '<option value="Tlogosari">Tlogosari</option>';
+            kecamatan_options_str  += '<option value="Tongas">Tongas</option>';
+            kecamatan_options_str  += '<option value="Torjun">Torjun</option>';
+            kecamatan_options_str  += '<option value="Tosari">Tosari</option>';
+            kecamatan_options_str  += '<option value="Tragah">Tragah</option>';
+            kecamatan_options_str  += '<option value="Trawas">Trawas</option>';
+            kecamatan_options_str  += '<option value="Trenggalek">Trenggalek</option>';
+            kecamatan_options_str  += '<option value="Trowulan">Trowulan</option>';
+            kecamatan_options_str  += '<option value="Trucuk">Trucuk</option>';
+            kecamatan_options_str  += '<option value="Tuban">Tuban</option>';
+            kecamatan_options_str  += '<option value="Tugu">Tugu</option>';
+            kecamatan_options_str  += '<option value="Tulakan">Tulakan</option>';
+            kecamatan_options_str  += '<option value="Tulangan">Tulangan</option>';
+            kecamatan_options_str  += '<option value="Tulungagung">Tulungagung</option>';
+            kecamatan_options_str  += '<option value="Tumpang">Tumpang</option>';
+            kecamatan_options_str  += '<option value="Turen">Turen</option>';
+            kecamatan_options_str  += '<option value="Turi">Turi</option>';
+            kecamatan_options_str  += '<option value="Tutur">Tutur</option>';
+            kecamatan_options_str  += '<option value="Udanawu">Udanawu</option>';
+            kecamatan_options_str  += '<option value="Ujungpangkah">Ujungpangkah</option>';
+            kecamatan_options_str  += '<option value="Umbulsari">Umbulsari</option>';
+            kecamatan_options_str  += '<option value="Wagir">Wagir</option>';
+            kecamatan_options_str  += '<option value="Wajak">Wajak</option>';
+            kecamatan_options_str  += '<option value="Waru">Waru</option>';
+            kecamatan_options_str  += '<option value="Wates">Wates</option>';
+            kecamatan_options_str  += '<option value="Watulimo">Watulimo</option>';
+            kecamatan_options_str  += '<option value="Widang">Widang</option>';
+            kecamatan_options_str  += '<option value="Widodaren">Widodaren</option>';
+            kecamatan_options_str  += '<option value="Wilangan">Wilangan</option>';
+            kecamatan_options_str  += '<option value="Winongan">Winongan</option>';
+            kecamatan_options_str  += '<option value="Wiyung">Wiyung</option>';
+            kecamatan_options_str  += '<option value="Wlingi">Wlingi</option>';
+            kecamatan_options_str  += '<option value="Wongsorejo">Wongsorejo</option>';
+            kecamatan_options_str  += '<option value="Wonoasih">Wonoasih</option>';
+            kecamatan_options_str  += '<option value="Wonoasri">Wonoasri</option>';
+            kecamatan_options_str  += '<option value="Wonoayu">Wonoayu</option>';
+            kecamatan_options_str  += '<option value="Wonocolo">Wonocolo</option>';
+            kecamatan_options_str  += '<option value="Wonodadi">Wonodadi</option>';
+            kecamatan_options_str  += '<option value="Wonokromo">Wonokromo</option>';
+            kecamatan_options_str  += '<option value="Wonomerto">Wonomerto</option>';
+            kecamatan_options_str  += '<option value="Wonorejo">Wonorejo</option>';
+            kecamatan_options_str  += '<option value="Wonosalam">Wonosalam</option>';
+            kecamatan_options_str  += '<option value="Wonosari">Wonosari</option>';
+            kecamatan_options_str  += '<option value="Wonotirto">Wonotirto</option>';
+            kecamatan_options_str  += '<option value="Wringin">Wringin</option>';
+            kecamatan_options_str  += '<option value="Wringinanom">Wringinanom</option>';
+            kecamatan_options_str  += '<option value="Wuluhan">Wuluhan</option>';
+            kecamatan_options_str  += '<option value="Wungu">Wungu</option>';
+            kecamatan_options_str  += '<option value="Yosowilangun">Yosowilangun</option>';
+            sel_kecamatan.innerHTML = kecamatan_options_str;
+            div_kecamatan.appendChild(sel_kecamatan);
+            var lab_kecamatan = document.createElement('div');
+            lab_kecamatan.innerHTML = 'kecamatan';
+            lab_kecamatan.className = 'filterlabel';
+            div_kecamatan.appendChild(lab_kecamatan);
+            var reset_kecamatan = document.createElement('div');
+            reset_kecamatan.innerHTML = 'clear filter';
+            reset_kecamatan.className = 'filterlabel';
+            reset_kecamatan.onclick = function() {
+                var options = document.getElementById("sel_kecamatan").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_kecamatan.appendChild(reset_kecamatan);
+        </script>
+    </body>
+</html>
